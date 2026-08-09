@@ -13,6 +13,9 @@ import TestimonialsSection from "./components/TestimonialsSection";
 import ContactSection from "./components/ContactSection";
 import SectionSeparator from "./components/SectionSeparator";
 
+import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/react";
+
 export default function App() {
   // Always stay with dark mode only
   const theme = "dark";
@@ -145,6 +148,9 @@ export default function App() {
           <LoadingScreen onComplete={() => setIsLoading(false)} />
         )}
       </AnimatePresence>
+
+      <Analytics />
+      <SpeedInsights />
 
       {/* Main website is mounted immediately so the browser can pre-render/paint it behind the loading overlay, preventing entering lag */}
       <div
