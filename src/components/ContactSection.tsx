@@ -35,7 +35,7 @@ export default function ContactSection() {
   const [toast, setToast] = useState<{ title: string; message: string; type: "success" | "info" } | null>(null);
 
   // Configuration
-  const GOOGLE_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyxTNKL_jPzBYFLUVY_68bMQfAJ0g1VIIUFL2skzwyCnWvK2rkZ4hhLseAfDguvYOemRw/exec";
+  const GOOGLE_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxkgdJRnBw9DTCIaMjY_hbOJS02stSYjcLXU8XjtM0VY5kgQTiBYzElXrmsRIgac9x5/exec";
 
   const handleCopy = (text: string, id: string, label: string) => {
     try {
