@@ -4,7 +4,6 @@ import { Menu, X, ArrowUpRight, ShieldCheck, Linkedin, Instagram, Youtube, Twitt
 import GillaXLogo from "./components/GillaXLogo";
 
 import LoadingScreen from "./components/LoadingScreen";
-import AdminPanel from "./admin/AdminPanel";
 import HeroSection from "./components/HeroSection";
 import ClientLogosBar from "./components/ClientLogosBar";
 import ProcessSection from "./components/ProcessSection";
@@ -75,8 +74,6 @@ export default function App() {
     return () => clearInterval(interval);
   }, []);
 
-  const [logoClickCount, setLogoClickCount] = useState(0);
-  const logoClickTimer = useState<ReturnType<typeof setTimeout> | null>(null);
   const [copiedDiscord, setCopiedDiscord] = useState(false);
   const [shareStatus, setShareStatus] = useState("");
 
@@ -115,15 +112,6 @@ export default function App() {
 
   const handleLogoClick = () => {
     scrollToSection("hero");
-    const newCount = logoClickCount + 1;
-    setLogoClickCount(newCount);
-    if (logoClickTimer[0]) clearTimeout(logoClickTimer[0]);
-    if (newCount >= 4) {
-      setLogoClickCount(0);
-      window.location.href = "/admin";
-      return;
-    }
-    logoClickTimer[1](setTimeout(() => setLogoClickCount(0), 1500));
   };
 
   const scrollToSection = (id: string) => {
@@ -132,12 +120,6 @@ export default function App() {
       element.scrollIntoView({ behavior: "smooth" });
     }
   };
-
-  // Show admin panel at /admin — skip loading, ensure body can scroll
-  if (window.location.pathname === "/admin") {
-    document.body.style.overflow = "";
-    return <AdminPanel />;
-  }
 
   return (
     <div className="relative min-h-screen selection:bg-[var(--accent-color)] selection:text-[var(--logo-text)]">
