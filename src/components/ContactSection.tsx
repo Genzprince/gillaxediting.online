@@ -27,7 +27,7 @@ export default function ContactSection() {
   const [clientName, setClientName] = useState("");
   const [clientEmail, setClientEmail] = useState("");
   const [clientBrief, setClientBrief] = useState("");
-  const [selectedMeetingType, setSelectedMeetingType] = useState("10-min");
+  const [selectedMeetingType, setSelectedMeetingType] = useState("30-min");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -105,30 +105,12 @@ export default function ContactSection() {
 
   const meetingTypes = [
     {
-      id: "10-min",
-      title: "10-Min Discovery Call",
+      id: "30-min",
+      title: "30-Min Discovery Call",
       description: "Quick chat to cover workflow, raw footage size, and general editing rates.",
-      duration: "10 Mins",
+      duration: "30 Mins",
       type: "Discovery Call",
       price: "Free",
-      url: "https://calendly.com/princeyt2001/30min"
-    },
-    {
-      id: "onboarding",
-      title: "Onboarding Call",
-      description: "Kick off the production workflow, synchronize project directories, and review asset delivery specifications.",
-      duration: "Onboard",
-      type: "Onboarding Call",
-      price: "Free",
-      url: "https://calendly.com/princeyt2001/30min"
-    },
-    {
-      id: "15-min-paid",
-      title: "15-Min Paid Consulting",
-      description: "In-depth dynamic audit of your content, editing strategy, and retention benchmarks.",
-      duration: "15 Mins",
-      type: "Strategic Consulting",
-      price: "$30 USD",
       url: "https://calendly.com/princeyt2001/30min"
     }
   ];
@@ -212,7 +194,7 @@ export default function ContactSection() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 mb-5">
+              <div className="grid grid-cols-1 gap-2.5 mb-5">
                 {meetingTypes.map((meeting) => (
                   <button
                     key={meeting.id}
@@ -380,30 +362,7 @@ export default function ContactSection() {
                 </motion.div>
               </div>
 
-              <motion.div
-                whileHover={{ y: -2 }}
-                onClick={() => handleCopy("Gillaxediting@gmail.com", "blip", "Blip Delivery Email")}
-                className="p-4 bg-[var(--card-bg)] border border-[var(--border-color)] hover:border-[var(--accent-color)]/30 rounded-2xl transition-all duration-300 shadow-xs flex items-center justify-between cursor-pointer group/blip-card"
-              >
-                <div className="flex items-center space-x-3.5">
-                  <div className="w-9 h-9 rounded-xl bg-[var(--accent-bg-trans)] flex items-center justify-center text-[var(--accent-color)] shrink-0 group-hover/blip-card:scale-105 transition-transform duration-300">
-                    <CloudUpload className="w-4 h-4" />
-                  </div>
-                  <div className="space-y-0.5">
-                    <div className="flex items-center space-x-2">
-                      <h4 className="font-display text-[11px] font-bold uppercase tracking-wider text-[var(--text-primary)]">Assets & Footage on Blip</h4>
-                      <span className="text-[7px] font-mono text-[var(--accent-color)] bg-[var(--accent-bg-trans)] px-1.5 py-0.5 rounded-full uppercase font-bold">FILES & FOOTAGE</span>
-                    </div>
-                    <p className="text-[10px] text-[var(--text-primary)]/65 font-light">Deliver raw footage packages directly to Prince's master pipeline.</p>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-2 shrink-0">
-                  <div className="bg-[var(--bg-primary)] border border-[var(--border-color)] group-hover/blip-card:border-[var(--accent-color)]/40 px-2.5 py-1.5 rounded-lg text-[10px] font-mono font-bold text-[var(--text-primary)] transition-all hidden sm:flex items-center space-x-2 select-none">
-                    <span>Gillaxediting@gmail.com on Blip</span>
-                    {copiedText === "blip" ? <Check className="w-3 h-3 text-[var(--accent-color)] animate-bounce" /> : <Copy className="w-3 h-3 text-[var(--accent-color)] opacity-60 group-hover/blip-card:opacity-100 transition-opacity" />}
-                  </div>
-                </div>
-              </motion.div>
+
             </div>
           </div>
 
