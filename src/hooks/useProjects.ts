@@ -30,8 +30,7 @@ export function useProjects() {
 
   const fetchProjects = async () => {
     try {
-      const apiUrl = import.meta.env.VITE_PORTFOLIO_API_URL || "https://script.google.com/macros/s/AKfycbwX560zFwif1yOT1MYp9vCVuM934atvERCNUPmvX4ql55WVSCvFX9LIm095wHJxgnY/exec";
-      const res = await fetch(apiUrl);
+      const res = await fetch("/api/projects");
       if (!res.ok) throw new Error("API unavailable");
       const data = await res.json();
       const mapped = data.map((p: any) => ({

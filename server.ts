@@ -30,16 +30,37 @@ async function startServer() {
   };
 
   const PROJECTS_FILE = path.join(process.cwd(), "public", "data", "projects.json");
-  const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "prince2026";
+  const GOOGLE_APPS_SCRIPT_URL = process.env.VITE_PORTFOLIO_API_URL || "https://script.google.com/macros/s/AKfycbwX560zFwif1yOT1MYp9vCVuM934atvERCNUPmvX4ql55WVSCvFX9LIm095wHJxgnY/exec";
 
-  // GET all projects — reads from local JSON
-  app.get("/api/projects", (_req, res) => {
+  let cachedProjects: any = null;
+  let cacheTimestamp: number = 0;
+  const CACHE_DURATION_MS = 7 * 24 * 60 * 60 * 1000; // 1 week
+
+  // GET all projects — fetches from Google Sheets and caches on server
+  app.get("/api/projects", async (_req, res) => {
     try {
-      const data = fs.readFileSync(PROJECTS_FILE, "utf-8");
-      res.json(JSON.parse(data));
+      if (cachedProjects && Date.now() - cacheTimestamp < CACHE_DURATION_MS) {
+        return res.json(cachedProjects);
+      }
+      
+      const fetchRes = await fetch(GOOGLE_APPS_SCRIPT_URL);
+      if (!fetchRes.ok) throw new Error("Failed to fetch from Google Sheets");
+      
+      const data = await fetchRes.json();
+      cachedProjects = data;
+      cacheTimestamp = Date.now();
+      
+      return res.json(data);
     } catch (err) {
-      console.error("GET /api/projects error:", err);
-      res.status(500).json({ error: "Could not read projects." });
+      console.error("GET /api/projects error, falling back:", err);
+      if (cachedProjects) return res.json(cachedProjects);
+      
+      try {
+        const data = fs.readFileSync(PROJECTS_FILE, "utf-8");
+        res.json(JSON.parse(data));
+      } catch (fsErr) {
+        res.status(500).json({ error: "Could not read projects." });
+      }
     }
   });
 
@@ -71,28 +92,7 @@ async function startServer() {
     res.status(400).json({ error: "Invalid channel" });
   });
 
-  // Verify administrator passcode
-  app.post("/api/admin/verify", (req, res) => {
-    const { password } = req.body;
-    if (password === ADMIN_PASSWORD) {
-      res.json({ success: true });
-    } else {
-      res.status(401).json({ error: "Invalid passcode" });
-    }
-  });
 
-  // PUT projects — writes to local JSON, password protected
-  app.put("/api/projects", (req, res) => {
-    const auth = req.headers["x-admin-password"];
-    if (auth !== ADMIN_PASSWORD) return res.status(401).json({ error: "Unauthorized" });
-    try {
-      fs.writeFileSync(PROJECTS_FILE, JSON.stringify(req.body, null, 2), "utf-8");
-      res.json({ success: true });
-    } catch (err) {
-      console.error("PUT /api/projects error:", err);
-      res.status(500).json({ error: "Could not save projects." });
-    }
-  });
 
   // API endpoint for Chatbot (Streaming)
   app.post("/api/chat", async (req, res) => {

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { ArrowUpRight, Pin, Lock, Unlock, Save } from "lucide-react";
+import { ArrowUpRight, Pin } from "lucide-react";
 import { Project } from "../types";
 import { useProjects } from "../hooks/useProjects";
 import ProjectCaseStudy from "./ProjectCaseStudy";
@@ -33,69 +33,18 @@ export default function PortfolioSection() {
   const [activeProject, setActiveProject] = useState<Project | null>(null);
   const [isCaseStudyOpen, setIsCaseStudyOpen] = useState(false);
 
-  // Admin Access and Edit States
-  const [isAdmin, setIsAdmin] = useState(() => {
-    try {
-      return sessionStorage.getItem("portfolio_is_admin") === "true";
-    } catch {
-      return false;
-    }
+  // Ensure we fallback gracefully if API doesn't return isRecent
+  const initializedProjects = PORTFOLIO_PROJECTS.map((p) => {
+    if (p.isRecent !== undefined) return p;
+    const defaultRecents = [
+      "pay-with-meta-glasses",
+      "no-magic-pill",
+      "bolt-motivation",
+      "inside-the-unknown",
+      "debate-highlights"
+    ];
+    return { ...p, isRecent: defaultRecents.includes(p.id) };
   });
-  const [showAdminModal, setShowAdminModal] = useState(false);
-  const [adminPassword, setAdminPassword] = useState("");
-  const [adminError, setAdminError] = useState("");
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "success" | "error">("idle");
-
-  const [localProjects, setLocalProjects] = useState<Project[]>([]);
-
-  // Sync and initialize isRecent fields when projects finish loading
-  useEffect(() => {
-    if (PORTFOLIO_PROJECTS && PORTFOLIO_PROJECTS.length > 0) {
-      const initialized = PORTFOLIO_PROJECTS.map((p) => {
-        if (p.isRecent !== undefined) {
-          return p;
-        }
-        // Fallback default showcased projects if not defined in database
-        const defaultRecents = [
-          "pay-with-meta-glasses",
-          "no-magic-pill",
-          "bolt-motivation",
-          "inside-the-unknown",
-          "debate-highlights"
-        ];
-        return {
-          ...p,
-          isRecent: defaultRecents.includes(p.id)
-        };
-      });
-      setLocalProjects(initialized);
-    }
-  }, [PORTFOLIO_PROJECTS]);
-
-  // Keep admin status persisted for the session
-  useEffect(() => {
-    try {
-      sessionStorage.setItem("portfolio_is_admin", isAdmin ? "true" : "false");
-    } catch (e) {
-      console.error(e);
-    }
-  }, [isAdmin]);
-
-  const toggleRecent = (id: string) => {
-    if (!isAdmin) return; // Only Admin can toggle pins!
-    setLocalProjects((prev) => {
-      const updated = prev.map((p) => {
-        if (p.id === id) {
-          return { ...p, isRecent: !p.isRecent };
-        }
-        return p;
-      });
-      setHasUnsavedChanges(true);
-      return updated;
-    });
-  };
 
   // Dynamic filter categories based on active format, with "Recent Work" as the very first tab
   const LONG_CATEGORIES = ["Recent Work", "All", "Commercial", "Gaming", "Events", "Documentary", "Commentary"];
@@ -104,7 +53,7 @@ export default function PortfolioSection() {
   const currentCategories = activeFormat === "long" ? LONG_CATEGORIES : SHORT_CATEGORIES;
 
   // Split projects based on duration (starts with 00: for short form, e.g. 00:45)
-  const sortedProjects = [...localProjects].sort((a, b) => {
+  const sortedProjects = [...initializedProjects].sort((a, b) => {
     if (a.pinned && !b.pinned) return -1;
     if (!a.pinned && b.pinned) return 1;
     return 0;
@@ -471,23 +420,7 @@ export default function PortfolioSection() {
                       </div>
                     )}
 
-                    {/* Floating Pin/Unpin Toggle Button - ONLY VISIBLE TO LOGGED IN ADMIN */}
-                    {isAdmin && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          toggleRecent(project.id);
-                        }}
-                        className={`absolute top-3 right-3 sm:top-4 sm:right-4 z-20 p-2 rounded-full border backdrop-blur-md transition-all duration-300 shadow-md ${
-                          project.isRecent
-                            ? "bg-[var(--accent-color)] text-black border-[var(--accent-color)] scale-105"
-                            : "bg-black/55 text-neutral-300 border-neutral-700/60 hover:bg-black/85 hover:text-white hover:scale-105"
-                        }`}
-                        title={project.isRecent ? "Remove from Recent Work" : "Pin to Recent Work"}
-                      >
-                        <Pin className={`w-3 h-3 sm:w-3.5 sm:h-3.5 transition-transform duration-300 ${project.isRecent ? "fill-black rotate-45 text-black" : "group-hover:rotate-12"}`} />
-                      </button>
-                    )}
+
                   </div>
 
                   {/* Card Content Footer */}
@@ -548,224 +481,7 @@ export default function PortfolioSection() {
         )}
       </div>
 
-      {/* Elegant Admin Passcode Modal */}
-      <AnimatePresence>
-        {showAdminModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4"
-          >
-            <motion.div
-              initial={{ scale: 0.95, y: 15 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.95, y: 15 }}
-              className="bg-neutral-900 border border-neutral-800 rounded-2xl p-6 w-full max-w-sm shadow-2xl relative overflow-hidden"
-            >
-              {/* Visual gradient top border */}
-              <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-[var(--accent-color)] to-amber-500" />
-              
-              <h3 className="text-base font-display font-bold text-white uppercase tracking-wider mb-2 flex items-center gap-2">
-                <Lock className="w-4 h-4 text-[var(--accent-color)]" />
-                Editor Access Mode
-              </h3>
-              <p className="text-xs text-neutral-400 font-light mb-5 leading-relaxed">
-                Only the portfolio owner can customize which videos appear in <span className="text-[var(--accent-color)] font-medium">Recent Work</span>.
-              </p>
-              
-              <form
-                onSubmit={async (e) => {
-                  e.preventDefault();
-                  try {
-                    const res = await fetch("/api/admin/verify", {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({ password: adminPassword })
-                    });
-                    if (res.ok) {
-                      setIsAdmin(true);
-                      setShowAdminModal(false);
-                      try {
-                        sessionStorage.setItem("portfolio_admin_passcode", adminPassword);
-                      } catch (err) {
-                        console.error(err);
-                      }
-                      setAdminPassword("");
-                      setAdminError("");
-                    } else {
-                      setAdminError("Invalid administrator passcode.");
-                    }
-                  } catch (err) {
-                    console.error("Auth error, using fallback:", err);
-                    if (adminPassword === "prince2026") {
-                      setIsAdmin(true);
-                      setShowAdminModal(false);
-                      try {
-                        sessionStorage.setItem("portfolio_admin_passcode", adminPassword);
-                      } catch (e) {
-                        console.error(e);
-                      }
-                      setAdminPassword("");
-                      setAdminError("");
-                    } else {
-                      setAdminError("Invalid administrator passcode.");
-                    }
-                  }
-                }}
-                className="space-y-4"
-              >
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-mono tracking-widest text-neutral-400 uppercase block">
-                    Admin Passcode
-                  </label>
-                  <input
-                    type="password"
-                    value={adminPassword}
-                    onChange={(e) => {
-                      setAdminPassword(e.target.value);
-                      setAdminError("");
-                    }}
-                    placeholder="••••••••"
-                    autoFocus
-                    className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-2.5 text-sm text-white placeholder-neutral-700 focus:outline-none focus:border-[var(--accent-color)] transition-colors text-center tracking-widest font-mono"
-                  />
-                  {adminError && (
-                    <p className="text-[10px] text-red-500 font-mono mt-1 text-center">
-                      {adminError}
-                    </p>
-                  )}
-                </div>
-                
-                <div className="flex gap-2.5 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowAdminModal(false);
-                      setAdminPassword("");
-                      setAdminError("");
-                    }}
-                    className="flex-1 px-4 py-2.5 rounded-xl text-xs font-mono tracking-wider font-bold border border-neutral-800 hover:bg-neutral-800 text-neutral-400 transition-colors uppercase"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="flex-1 px-4 py-2.5 rounded-xl text-xs font-mono tracking-wider font-bold bg-[var(--accent-color)] text-black hover:bg-[var(--accent-hover)] transition-colors uppercase cursor-pointer"
-                  >
-                    Unlock
-                  </button>
-                </div>
-              </form>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
-      {/* Floating Unsaved Changes Bar for Admin */}
-      <AnimatePresence>
-        {isAdmin && hasUnsavedChanges && (
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 50 }}
-            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-neutral-950 border border-emerald-500/30 rounded-2xl px-6 py-4 flex flex-col sm:flex-row items-center gap-4 shadow-2xl backdrop-blur-md max-w-lg w-[calc(100%-2rem)]"
-          >
-            <div className="flex items-center gap-3 text-center sm:text-left">
-              <div className="bg-emerald-950/80 p-2 rounded-full text-emerald-400 border border-emerald-500/20 shadow-inner">
-                <Unlock className="w-4 h-4 animate-pulse" />
-              </div>
-              <div>
-                <h4 className="text-xs font-display font-bold text-white uppercase tracking-wider">Unsaved Pin Changes</h4>
-                <p className="text-[10px] text-neutral-400 font-light mt-0.5 leading-none">
-                  {saveStatus === "success" 
-                    ? "✓ Recent Work showcase saved successfully!" 
-                    : saveStatus === "error" 
-                    ? "❌ Failed to save. Please try again." 
-                    : "You have customized the Recent Work showcase."}
-                </p>
-              </div>
-            </div>
-            
-            <div className="flex gap-2 w-full sm:w-auto ml-auto">
-              {saveStatus === "idle" && (
-                <>
-                  <button
-                    onClick={() => {
-                      if (PORTFOLIO_PROJECTS) {
-                        setLocalProjects(PORTFOLIO_PROJECTS.map(p => ({
-                          ...p,
-                          isRecent: p.isRecent ?? [
-                            "pay-with-meta-glasses",
-                            "no-magic-pill",
-                            "bolt-motivation",
-                            "inside-the-unknown",
-                            "debate-highlights"
-                          ].includes(p.id)
-                        })));
-                      }
-                      setHasUnsavedChanges(false);
-                      setSaveStatus("idle");
-                    }}
-                    className="flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-[10px] font-mono tracking-widest font-bold border border-neutral-800 hover:bg-neutral-800 text-neutral-400 transition-colors uppercase cursor-pointer"
-                  >
-                    Discard
-                  </button>
-                  <button
-                    onClick={async () => {
-                      setIsSaving(true);
-                      setSaveStatus("saving");
-                      const savedPasscode = sessionStorage.getItem("portfolio_admin_passcode") || "prince2026";
-                      try {
-                        const response = await fetch("/api/projects", {
-                          method: "PUT",
-                          headers: {
-                            "Content-Type": "application/json",
-                            "x-admin-password": savedPasscode
-                          },
-                          body: JSON.stringify(localProjects)
-                        });
-                        if (response.ok) {
-                          setSaveStatus("success");
-                          if (refetch) {
-                            await refetch();
-                          }
-                          setTimeout(() => {
-                            setHasUnsavedChanges(false);
-                            setSaveStatus("idle");
-                          }, 2500);
-                        } else {
-                          setSaveStatus("error");
-                          setTimeout(() => setSaveStatus("idle"), 3000);
-                        }
-                      } catch (e) {
-                        console.error(e);
-                        setSaveStatus("error");
-                        setTimeout(() => setSaveStatus("idle"), 3000);
-                      } finally {
-                        setIsSaving(false);
-                      }
-                    }}
-                    disabled={isSaving}
-                    className="flex-1 sm:flex-none px-4 py-2 rounded-xl text-[10px] font-mono tracking-widest font-bold bg-emerald-500 text-black hover:bg-emerald-400 disabled:opacity-50 transition-colors uppercase cursor-pointer flex items-center justify-center gap-1.5"
-                  >
-                    {isSaving ? "Saving..." : "Save Showcase"}
-                  </button>
-                </>
-              )}
-              {saveStatus === "saving" && (
-                <span className="text-[10px] font-mono text-emerald-400 animate-pulse">SAVING TO DATABASE...</span>
-              )}
-              {saveStatus === "success" && (
-                <span className="text-[10px] font-mono text-emerald-400 font-bold">✓ SAVED!</span>
-              )}
-              {saveStatus === "error" && (
-                <span className="text-[10px] font-mono text-red-400 font-bold">❌ FAILED</span>
-              )}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* Case Study Modal renderer */}
       <AnimatePresence>
