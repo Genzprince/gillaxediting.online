@@ -30,7 +30,8 @@ export function useProjects() {
 
   const fetchProjects = async () => {
     try {
-      const res = await fetch("/api/projects");
+      const apiUrl = import.meta.env.VITE_PORTFOLIO_API_URL || "/api/projects";
+      const res = await fetch(apiUrl);
       if (!res.ok) throw new Error("API unavailable");
       const data = await res.json();
       const mapped = data.map((p: any) => ({

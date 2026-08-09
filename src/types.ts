@@ -4,6 +4,8 @@ export interface Project {
   client: string;
   featured?: boolean;
   isRecent?: boolean;
+  categoryPosition?: number;
+  recentPosition?: number;
   category: "YouTube" | "Gaming" | "Documentary" | "Commercial" | "Motion Graphics" | "Short Form" | "Long Form";
   description: string;
   duration: string;

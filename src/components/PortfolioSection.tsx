@@ -115,7 +115,7 @@ export default function PortfolioSection() {
 
   const activeProjects = activeFormat === "long" ? longFormProjects : shortFormProjects;
 
-  const filteredProjects = selectedCategory === "Recent Work"
+  let filteredProjects = selectedCategory === "Recent Work"
     ? activeProjects.filter(p => p.isRecent)
     : selectedCategory === "All"
     ? activeProjects
@@ -135,6 +135,23 @@ export default function PortfolioSection() {
           p.skills.some(k => k.toLowerCase().includes(catLower))
         );
       });
+
+  // Apply custom ordering based on CMS positions
+  filteredProjects = [...filteredProjects].sort((a, b) => {
+    // Keep pinned admin logic first
+    if (a.pinned && !b.pinned) return -1;
+    if (!a.pinned && b.pinned) return 1;
+
+    if (selectedCategory === "Recent Work") {
+      const posA = a.recentPosition ?? 9999;
+      const posB = b.recentPosition ?? 9999;
+      return posA - posB;
+    } else {
+      const posA = a.categoryPosition ?? 9999;
+      const posB = b.categoryPosition ?? 9999;
+      return posA - posB;
+    }
+  });
 
   const handleOpenCaseStudy = (project: Project) => {
     setActiveProject(project);
