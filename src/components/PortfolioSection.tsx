@@ -164,50 +164,7 @@ export default function PortfolioSection() {
               <span>PORTFOLIO SHOWCASE</span>
             </div>
             
-            <button
-              onClick={() => {
-                if (isAdmin) {
-                  setIsAdmin(false);
-                  setHasUnsavedChanges(false);
-                  if (PORTFOLIO_PROJECTS) {
-                    setLocalProjects(PORTFOLIO_PROJECTS.map(p => ({
-                      ...p,
-                      isRecent: p.isRecent ?? [
-                        "pay-with-meta-glasses",
-                        "no-magic-pill",
-                        "bolt-motivation",
-                        "inside-the-unknown",
-                        "debate-highlights"
-                      ].includes(p.id)
-                    })));
-                  }
-                } else {
-                  setShowAdminModal(true);
-                }
-              }}
-              className={`p-1.5 rounded-full border transition-all duration-300 flex items-center justify-center cursor-pointer ${
-                isAdmin
-                  ? "bg-emerald-950/40 text-emerald-400 border-emerald-500/30 hover:bg-emerald-900/60 hover:scale-105"
-                  : "bg-neutral-900/40 text-neutral-500 border-neutral-800 hover:text-neutral-300 hover:border-neutral-700 hover:bg-neutral-800/60 hover:scale-105"
-              }`}
-              title={isAdmin ? "Exit Editor Mode" : "Admin Login"}
-            >
-              {isAdmin ? (
-                <Unlock className="w-3.5 h-3.5" />
-              ) : (
-                <Lock className="w-3.5 h-3.5" />
-              )}
-            </button>
 
-            {isAdmin && (
-              <a
-                href="/admin"
-                className="inline-flex items-center space-x-1.5 bg-[#7C6F9F] text-black px-4 py-1.5 rounded-full text-[10px] font-mono tracking-widest uppercase hover:bg-[#8A7BB3] hover:scale-103 transition-all duration-300 shadow-md font-black"
-                title="Open Portfolio Manager Dashboard"
-              >
-                <span>PORTFOLIO MANAGER ⚙️</span>
-              </a>
-            )}
           </div>
           <h2 className="font-display text-4xl sm:text-5xl lg:text-6xl font-black text-[var(--text-primary)] uppercase tracking-tighter leading-none">
             Featured Projects
