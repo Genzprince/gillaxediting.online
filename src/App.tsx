@@ -350,7 +350,8 @@ export default function App() {
             <div className="w-full max-w-[1440px] mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
               
               <div className="flex flex-col text-center md:text-left space-y-2">
-                <div className="flex items-center justify-center md:justify-start space-x-2">
+                <div className="flex items-center justify-center md:justify-start space-x-3">
+                  <GillaXLogo className="w-7 h-7" glow={false} />
                   <span className="font-display text-sm font-black tracking-widest text-[var(--text-primary)]">GILLAX EDITING</span>
                   <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                 </div>

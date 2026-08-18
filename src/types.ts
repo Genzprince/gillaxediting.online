@@ -1,27 +1,51 @@
 export interface Project {
+  /** Unique URL-friendly slug identifier (e.g. "skill-vs-dominance") */
   id: string;
+  /** Display title of the project */
   title: string;
-  client: string;
-  featured?: boolean;
-  isRecent?: boolean;
-  categoryPosition?: number;
-  recentPosition?: number;
-  category: "YouTube" | "Gaming" | "Documentary" | "Commercial" | "Motion Graphics" | "Short Form" | "Long Form";
-  description: string;
+  /** Duration in MM:SS (e.g. "05:00" for Long Form, "00:45" for Short Form) */
   duration: string;
-  result: string; // replaced stats
-  role: string;
-  challenge: string;
-  solution: string;
-  skills: string[]; // replaced keys
+  /** Primary category / genre tag */
+  category: "YouTube" | "Gaming" | "Documentary" | "Commercial" | "Motion Graphics" | "Short Form" | "Long Form" | "Events" | "Mystery" | "Commentary" | string;
+  /** Full YouTube video or Shorts link */
   youtubeLink: string;
-  youtubeEmbed?: string; // dynamically populated
+  /** Summary / project description */
+  description: string;
+  /** Client, creator, or channel name (Optional) */
+  client?: string;
+  /** Whether the video is featured in the portfolio (Optional, default true) */
+  featured?: boolean;
+  /** Whether the video is featured in the Recent Work tab (Optional) */
+  isRecent?: boolean;
+  /** Display order position in category filter tabs (Optional) */
+  categoryPosition?: number;
+  /** Display order position in Recent Work tab (Optional) */
+  recentPosition?: number;
+  /** Highlight result / metric stat (Optional, e.g. "40% Higher Retention") */
+  result?: string;
+  /** Role performed on the project (Optional, e.g. "Lead Video Editor & Motion Designer") */
+  role?: string;
+  /** Challenge faced during editing/storytelling (Optional) */
+  challenge?: string;
+  /** Solution applied to solve the challenge (Optional) */
+  solution?: string;
+  /** List of skill tags (Optional, e.g. ["Storytelling", "Sound Design"]) */
+  skills?: string[];
+  /** Auto-generated or custom YouTube embed iframe URL (Optional) */
+  youtubeEmbed?: string;
+  /** Link to Instagram post / reel (Optional) */
   instagramLink?: string;
+  /** Direct MP4 / streaming video URL (Optional) */
   videoUrl?: string;
-  thumbnail: string;
-  platform: string;
-  year: string;
+  /** Thumbnail image URL (Optional, auto-extracted from YouTube if omitted) */
+  thumbnail?: string;
+  /** Primary platform (Optional, e.g. "YouTube", "YouTube Shorts", "Instagram") */
+  platform?: string;
+  /** Release year (Optional, e.g. "2024") */
+  year?: string;
+  /** Whether the card is pinned to the top of the grid (Optional) */
   pinned?: boolean;
+  /** Project date (Optional) */
   projectDate?: string;
 }
 
@@ -45,162 +69,9 @@ export interface Testimonial {
   avatarInitials: string;
 }
 
-export const PORTFOLIO_PROJECTS: Project[] = [
-  {
-    id: "pay-with-meta-glasses",
-    title: "Pay with Meta Glasses",
-    client: "Tech Creator (10M+ Audience)",
-    category: "Short Form",
-    platform: "Instagram",
-    year: "2024",
-    thumbnail: "https://img.youtube.com/vi/8CRSbenK7xE/0.jpg",
-    youtubeLink: "https://www.youtube.com/watch?v=8CRSbenK7xE",
-    instagramLink: "https://www.instagram.com/reel/C8_XyP-oWdf/",
-    duration: "00:30",
-    description: "An AI-powered explainer video demonstrating the future of digital payments through Meta Glasses.",
-    role: "Lead Editor & Motion Designer",
-    skills: ["Storytelling", "Motion Graphics", "Sound Design"],
-    challenge: "The challenge was to explain a futuristic technology concept in a way that felt exciting, visually engaging, and easy for a broad audience to understand.",
-    solution: "Built a visual-first storytelling approach using AI-generated imagery, cinematic motion graphics, advanced compositing, and voice-driven editing.",
-    result: "10M+ Reach",
-    featured: true,
-    isRecent: true
-  },
-  {
-    id: "no-magic-pill",
-    title: "No Magic Pill",
-    client: "Personal Showcase",
-    category: "Short Form",
-    platform: "YouTube Shorts",
-    year: "2024",
-    thumbnail: "https://img.youtube.com/vi/kc6z2D-7i1k/0.jpg",
-    youtubeLink: "https://www.youtube.com/watch?v=kc6z2D-7i1k",
-    duration: "00:45",
-    description: "A cinematic typography and motion graphics showcase reinforcing a simple truth: there is no shortcut to success.",
-    role: "Motion Designer & Creative Director",
-    skills: ["Typography", "After Effects", "Sound Design"],
-    challenge: "Create a visually striking motion graphics piece that showcases advanced After Effects skills while delivering a memorable message.",
-    solution: "Designed a fast-paced visual sequence using custom typography animations, cinematic transitions, and precisely synchronized sound design.",
-    result: "Portfolio Showcase",
-    featured: true,
-    isRecent: true
-  },
-  {
-    id: "bolt-motivation",
-    title: "Bolt Motivation",
-    client: "Motivation Brand",
-    category: "Short Form",
-    platform: "YouTube Shorts",
-    year: "2024",
-    thumbnail: "https://img.youtube.com/vi/waODTGRgnjw/0.jpg",
-    youtubeLink: "https://youtube.com/shorts/waODTGRgnjw",
-    instagramLink: "https://www.instagram.com/reel/C7pA-g3ID-h/",
-    duration: "00:50",
-    description: "A high-retention motivational short designed to inspire action through cinematic storytelling and emotionally charged pacing.",
-    role: "Lead Video Editor",
-    skills: ["Storytelling", "Sound Design", "Audience Retention"],
-    challenge: "The client needed premium-quality motivational videos that could compete with the best-performing creators while maximizing retention on a budget.",
-    solution: "Developed a cinematic editing workflow combining emotional pacing, animation-driven motion graphics, and music synchronization.",
-    result: "5M+ Views",
-    featured: true,
-    isRecent: true
-  },
-  {
-    id: "inside-the-unknown",
-    title: "Inside the Unknown",
-    client: "Entertainment Creator",
-    category: "Short Form",
-    platform: "YouTube Shorts",
-    year: "2024",
-    thumbnail: "https://img.youtube.com/vi/2XHEds47WiE/0.jpg",
-    youtubeLink: "https://www.youtube.com/watch?v=2XHEds47WiE",
-    duration: "00:55",
-    description: "A suspense-driven short-form content series transforming abandoned house explorations into cinematic mystery stories.",
-    role: "Video Editor & Script Writer",
-    skills: ["Suspense Storytelling", "Sound Design", "AI Voiceover"],
-    challenge: "Raw exploration footage lacked structure and emotional progression, making it difficult to maintain audience attention.",
-    solution: "Developed engaging narrative structures, generated AI voiceovers, and crafted cinematic edits using suspenseful pacing and timed reveals.",
-    result: "8M+ Views",
-    featured: true,
-    isRecent: true
-  },
-  {
-    id: "debate-highlights",
-    title: "Debate Highlights",
-    client: "US Commentary Creator",
-    category: "Short Form",
-    platform: "TikTok",
-    year: "2024",
-    thumbnail: "https://img.youtube.com/vi/RvkEwv-abOU/0.jpg",
-    youtubeLink: "https://www.youtube.com/watch?v=RvkEwv-abOU",
-    duration: "00:50",
-    description: "A dynamic short-form edit transforming lengthy debate recordings into engaging, viral highlights optimized for social media retention.",
-    role: "Lead Video Editor",
-    skills: ["Storytelling", "Dynamic Editing", "Content Strategy"],
-    challenge: "The original debate recordings contained lengthy discussions and slow pacing that reduced viewer retention.",
-    solution: "Identified the strongest discussion points, restructured conversations into a clear narrative flow, and enhanced key moments.",
-    result: "3M+ Views",
-    featured: true,
-    isRecent: true
-  },
-  {
-    id: "gaming-creator-network",
-    title: "Gaming Creator Network",
-    client: "Trigger Insaan",
-    category: "Short Form",
-    platform: "YouTube Shorts",
-    year: "2023",
-    thumbnail: "https://img.youtube.com/vi/-wgbizdRjpI/0.jpg",
-    youtubeLink: "https://www.youtube.com/watch?v=-wgbizdRjpI",
-    duration: "00:55",
-    description: "High-retention short-form content produced for one of India's largest gaming creator ecosystems.",
-    role: "Lead Editor & Strategist",
-    skills: ["Gaming Storytelling", "Audience Retention", "Creative Direction"],
-    challenge: "Managing multiple gaming channels required maintaining consistent production quality while giving each creator a distinct editing style.",
-    solution: "Developed complete post-production workflows covering content planning, scripting, gameplay pacing, meme integration, and cinematic editing.",
-    result: "25M+ Audience",
-    featured: true,
-    isRecent: false
-  },
-  {
-    id: "festival-sale-campaign",
-    title: "Festival Sale Campaign",
-    client: "Retail Brand",
-    category: "Short Form",
-    platform: "Instagram",
-    year: "2023",
-    thumbnail: "https://img.youtube.com/vi/1y0-1ovcPmg/0.jpg",
-    youtubeLink: "https://www.youtube.com/watch?v=1y0-1ovcPmg",
-    duration: "00:35",
-    description: "A festive promotional advertisement transforming a standard sales announcement into an engaging, high-impact marketing campaign.",
-    role: "Video Editor & Motion Designer",
-    skills: ["Commercial Editing", "Motion Graphics", "Sound Design"],
-    challenge: "The client needed to showcase multiple festive offers within a short timeframe without overwhelming viewers.",
-    solution: "Designed a fast-paced commercial edit using animated typography, promotional motion graphics, and carefully synchronized sound effects.",
-    result: "120 Videos Edited",
-    featured: true,
-    isRecent: false
-  },
-  {
-    id: "skill-vs-dominance",
-    title: "Skill vs Dominance",
-    client: "Basketball Gods",
-    category: "Documentary",
-    platform: "YouTube",
-    year: "2024",
-    thumbnail: "https://img.youtube.com/vi/T-dJKvPi4pc/0.jpg",
-    youtubeLink: "https://youtu.be/T-dJKvPi4pc?si=bX3tXrCA1x28ylov",
-    duration: "11:42",
-    description: "A cinematic basketball documentary exploring Victor Wembanyama's unique playing style through tactical analysis, visual storytelling, and ESPN-inspired presentation.",
-    role: "Lead Video Editor",
-    skills: ["Sports Storytelling", "Motion Graphics", "Sound Design"],
-    challenge: "Traditional basketball analysis relies on repetitive highlights and static commentary that struggle to maintain viewer engagement.",
-    solution: "Reimagined the script as a visual story combining cinematic pacing, basketball telestration, AI-enhanced imagery, custom motion graphics, and dramatic sound design.",
-    result: "40% Higher Retention",
-    featured: true,
-    isRecent: true
-  }
-];
+export { longFormVideos } from "./data/longFormVideos";
+export { shortFormVideos } from "./data/shortFormVideos";
+export { PORTFOLIO_PROJECTS, ALL_PROJECTS } from "./data";
 
 export const CLIENT_TESTIMONIALS: Testimonial[] = [
   {

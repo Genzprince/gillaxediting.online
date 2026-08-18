@@ -29,40 +29,40 @@ export function getYoutubeEmbedUrl(youtubeLink: string | undefined): string {
   return videoId ? `https://www.youtube.com/embed/${videoId}` : "";
 }
 
+function processProject(p: Project | any): Project {
+  const videoId = getYoutubeVideoId(p.youtubeLink);
+  return {
+    ...p,
+    youtubeEmbed: p.youtubeEmbed || (videoId ? `https://www.youtube.com/embed/${videoId}` : ""),
+    thumbnail: p.thumbnail && p.thumbnail.trim() !== "" 
+      ? p.thumbnail 
+      : (videoId ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` : "")
+  };
+}
+
 export function useProjects() {
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [projects, setProjects] = useState<Project[]>(() => PORTFOLIO_PROJECTS.map(processProject));
+  const [loading, setLoading] = useState(false);
 
   const fetchProjects = async () => {
     try {
       const res = await fetch("/api/projects");
       if (!res.ok) throw new Error("API unavailable");
       const data = await res.json();
-      const mapped = data.map((p: any) => {
-        const videoId = getYoutubeVideoId(p.youtubeLink);
-        return {
-          ...p,
-          youtubeEmbed: p.youtubeEmbed || (videoId ? `https://www.youtube.com/embed/${videoId}` : ""),
-          thumbnail: videoId ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` : p.thumbnail
-        };
-      });
-      setProjects(mapped);
+      if (Array.isArray(data) && data.length > 0) {
+        setProjects(data.map(processProject));
+      }
     } catch {
-      const mapped = PORTFOLIO_PROJECTS.map((p: any) => {
-        const videoId = getYoutubeVideoId(p.youtubeLink);
-        return {
-          ...p,
-          youtubeEmbed: p.youtubeEmbed || (videoId ? `https://www.youtube.com/embed/${videoId}` : ""),
-          thumbnail: videoId ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` : p.thumbnail
-        };
-      });
-      setProjects(mapped);
+      // Fallback is already loaded from local data files
+      setProjects(PORTFOLIO_PROJECTS.map(processProject));
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => { fetchProjects(); }, []);
+  useEffect(() => {
+    fetchProjects();
+  }, []);
 
   return { projects, loading, refetch: fetchProjects };
 }

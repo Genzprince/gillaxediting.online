@@ -222,10 +222,12 @@ export default function AIChatBot() {
                 </button>
                 
                 {/* Logo & Agent Name */}
-                <div className="flex items-center space-x-2">
-                  <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-purple-600 to-indigo-600 flex items-center justify-center text-white font-black text-lg shadow-sm">
-                    G
-                  </div>
+                <div className="flex items-center space-x-2.5">
+                  <img
+                    src="/logo.png"
+                    alt="Gilla_x Avatar"
+                    className="w-9 h-9 rounded-full object-cover border border-purple-500/30 shadow-md"
+                  />
                   <div>
                     <h3 className="text-sm font-bold text-white tracking-tight leading-none">
                       Gilla_x AI
@@ -398,9 +400,11 @@ export default function AIChatBot() {
               setHasNewNotification(false);
             }}
           >
-            <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-purple-600 to-indigo-600 flex items-center justify-center text-white font-black shrink-0 mt-0.5 shadow-sm text-xs leading-none">
-              G
-            </div>
+            <img
+              src="/logo.png"
+              alt="Gilla_x"
+              className="w-7 h-7 rounded-full object-cover shrink-0 mt-0.5 border border-purple-500/30 shadow-sm"
+            />
             <div className="space-y-1">
               <p className="font-bold text-purple-400 uppercase text-[10px] tracking-wider font-display">Gilla_x AI</p>
               <p className="text-[11px] leading-relaxed text-neutral-450 opacity-90">Need direct scheduling, WhatsApp, Gilla_x portfolio, or pricing? Chat with me here! 😊</p>

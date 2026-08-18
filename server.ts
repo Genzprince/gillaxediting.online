@@ -9,7 +9,7 @@ dotenv.config({ path: ".env.local" });
 
 async function startServer() {
   const app = express();
-  const PORT = 3000;
+  let PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 
   app.use(express.json({ limit: "10mb" }));
 
@@ -30,41 +30,19 @@ async function startServer() {
   };
 
   const PROJECTS_FILE = path.join(process.cwd(), "public", "data", "projects.json");
-  const GOOGLE_APPS_SCRIPT_URL = process.env.VITE_PORTFOLIO_API_URL || "https://script.google.com/macros/s/AKfycbwX560zFwif1yOT1MYp9vCVuM934atvERCNUPmvX4ql55WVSCvFX9LIm095wHJxgnY/exec";
 
-  let cachedProjects: any = null;
-  let cacheTimestamp: number = 0;
-  const CACHE_DURATION_MS = 7 * 24 * 60 * 60 * 1000; // 1 week
-
-  // GET all projects — fetches from Google Sheets and caches on server
-  app.get("/api/projects", async (_req, res) => {
+  // GET all projects — directly served from local data store
+  app.get("/api/projects", (_req, res) => {
     try {
-      if (cachedProjects && Date.now() - cacheTimestamp < CACHE_DURATION_MS) {
-        return res.json(cachedProjects);
-      }
-      
-      const fetchRes = await fetch(GOOGLE_APPS_SCRIPT_URL);
-      if (!fetchRes.ok) throw new Error("Failed to fetch from Google Sheets");
-      
-      const data = await fetchRes.json();
-      cachedProjects = data;
-      cacheTimestamp = Date.now();
-      
-      return res.json(data);
+      const data = fs.readFileSync(PROJECTS_FILE, "utf-8");
+      return res.json(JSON.parse(data));
     } catch (err) {
-      console.error("GET /api/projects error, falling back:", err);
-      if (cachedProjects) return res.json(cachedProjects);
-      
-      try {
-        const data = fs.readFileSync(PROJECTS_FILE, "utf-8");
-        res.json(JSON.parse(data));
-      } catch (fsErr) {
-        res.status(500).json({ error: "Could not read projects." });
-      }
+      console.error("GET /api/projects error:", err);
+      return res.status(500).json({ error: "Could not read projects." });
     }
   });
 
-  // POST contact form — sends message via Telegram bot
+  // POST contact form — sends message via Telegram bot (Optional integration)
   app.post("/api/contact", async (req, res) => {
     const { name, email, brief, via } = req.body;
     if (!name || !email || !brief) return res.status(400).json({ error: "Missing fields" });
@@ -80,7 +58,7 @@ async function startServer() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ chat_id: chatId, text, parse_mode: "Markdown" }),
         });
-        const tgData = await tgRes.json() as { ok: boolean; description?: string };
+        const tgData = (await tgRes.json()) as { ok: boolean; description?: string };
         if (!tgData.ok) return res.status(500).json({ error: tgData.description });
         return res.json({ success: true });
       } catch (err) {
@@ -92,8 +70,6 @@ async function startServer() {
     res.status(400).json({ error: "Invalid channel" });
   });
 
-
-
   // API endpoint for Chatbot (Streaming)
   app.post("/api/chat", async (req, res) => {
     try {
@@ -104,7 +80,6 @@ async function startServer() {
 
       const ai = getGeminiClient();
 
-      // Formulate system instruction with Prince's details and links
       const systemInstruction = `You are "Gilla_x AI Assistant" — a highly professional, witty, and elite virtual assistant representing Gillaxediting and Gilla_x, led by Prince, a world-class Video Editor, Script Writer, and Motion Designer. 
 Your goal is to answer client questions, share Gillaxediting's video portfolio, and convert conversations into easy bookings or submitted inquiries.
 You are fully capable of answering ANY general, technical, creative, or miscellaneous question with extreme wisdom and accuracy. Even if a question is unrelated to video editing, answer it perfectly while maintaining your professional, witty brand identity.
@@ -120,24 +95,19 @@ GILLAXEDITING DIRECT LINKS & INFO:
 - Twitter / X: https://x.com/Gillaxediting (Follow for updates!)
 - Discord: https://discord.gg/princefilms (Join the creative community!)
 - Portfolio Work & Case Studies: Gillaxediting works for mega-creators like Gilla_x, Trigger Insaan (25M+ subscribers), Lazy Assassin (1M+), Lazy Playz (300K+), GTA Assassin Guides, and US Clients.
-- CV: You can download Prince's Professional resume/CV here: https://raw.githubusercontent.com/prince-films/cv/main/Prince_Creative_Resume.pdf
 
 HOW TO BOOK OR START A PROJECT:
-- Booking is extremely simple and non-complicated! 
 - Direct clients to scroll to the "Let's Collaborate" section at the bottom of the page to fill out the simple "Send a Quick Message" form.
 - Or invite them to click the direct WhatsApp chat link (https://wa.me/919646028153) to speak with Gillaxediting instantly.
-- If they want to send raw video files, footage, or assets, let them know they can send them to Gillaxediting@gmail.com or share directly on Blip.
+- If they want to send raw video files, footage, or assets, let them know they can send them to Gillaxediting@gmail.com.
 
 Be friendly, direct, and help the client book before slots fill up!`;
 
-      // Map incoming messages to Gemini structure
-      // Expected structure: { role: "user" | "model", parts: [{ text: string }] }
       const contents = messages.map((m: any) => ({
         role: m.role === "assistant" ? "model" : "user",
         parts: [{ text: m.content }],
       }));
 
-      // Set headers for SSE streaming
       res.setHeader("Content-Type", "text/event-stream");
       res.setHeader("Cache-Control", "no-cache");
       res.setHeader("Connection", "keep-alive");
@@ -149,7 +119,6 @@ Be friendly, direct, and help the client book before slots fill up!`;
         config: {
           systemInstruction,
           temperature: 0.7,
-          tools: [{ googleSearch: {} }],
         },
       });
 
@@ -186,9 +155,22 @@ Be friendly, direct, and help the client book before slots fill up!`;
     });
   }
 
-  app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Server running on http://localhost:${PORT}`);
-  });
+  const listenOnPort = (portToTry: number) => {
+    const server = app.listen(portToTry, "0.0.0.0", () => {
+      console.log(`Server running on http://localhost:${portToTry}`);
+    });
+
+    server.on("error", (err: any) => {
+      if (err.code === "EADDRINUSE") {
+        console.log(`Port ${portToTry} in use, trying port ${portToTry + 1}...`);
+        listenOnPort(portToTry + 1);
+      } else {
+        console.error("Server error:", err);
+      }
+    });
+  };
+
+  listenOnPort(PORT);
 }
 
 startServer().catch((err) => {
